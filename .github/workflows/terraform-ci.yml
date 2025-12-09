@@ -33,14 +33,14 @@ jobs:
         run: terraform validate
 
       - name: Create Pull Request to Main
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: Update terraform from develop
-          title: '[Auto] Alterações vindas da Develop'
-          body: |
-            Esse PR foi aberto automaticamente pelo GitHub Actions.
-            Validação do Terraform: ✅ Sucesso.
-          branch: develop
-          base: main
-          delete-branch: false
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --base main \
+            --head develop \
+            --title "[Auto] Alterações vindas da Develop" \
+            --body "Esse PR foi aberto automaticamente pelo GitHub Actions após validação do Terraform." \
+          || echo "PR já existe ou não há mudanças, seguindo..."
+        working-directory: .
