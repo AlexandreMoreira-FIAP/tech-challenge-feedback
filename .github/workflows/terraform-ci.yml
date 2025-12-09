@@ -10,7 +10,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  terraform-and-pr:
+  validacao:
+    name: 'Validação Terraform e PR'
     runs-on: ubuntu-latest
 
     defaults:

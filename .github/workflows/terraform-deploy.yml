@@ -10,7 +10,7 @@ on:
 
 jobs:
   terraform:
-    name: 'Terraform'
+    name: 'Deploy Projeto na Azure'
     runs-on: ubuntu-latest
 
     steps:
