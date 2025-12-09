@@ -1,0 +1,46 @@
+name: Validate and Create PR
+
+on:
+  push:
+    branches:
+      - develop
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  terraform-and-pr:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./infra
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Create Pull Request to Main
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: Update terraform from develop
+          title: '[Auto] Alterações vindas da Develop'
+          body: |
+            Esse PR foi aberto automaticamente pelo GitHub Actions.
+            Validação do Terraform: ✅ Sucesso.
+          branch: develop
+          base: main
+          delete-branch: false
