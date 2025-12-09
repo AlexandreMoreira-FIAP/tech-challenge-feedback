@@ -3,5 +3,5 @@ variable "app_name" {
 }
 
 variable "location" {
-  default     = "eastus"
+  default     = "eastus2"
 }
