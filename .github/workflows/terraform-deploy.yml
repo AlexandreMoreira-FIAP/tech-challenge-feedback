@@ -19,7 +19,7 @@ jobs:
 
     env:
       TF_VAR_app_name: "techchallengefeedback"
-      TF_VAR_location: "brazilsouth"
+      TF_VAR_location: "southafricanorth"
       BACKEND_RG_NAME: "rg-techchallengefeedback-state"
       BACKEND_SA_NAME: "sttechchallengefeedback"
       BACKEND_CONTAINER_NAME: "terraform-state"
