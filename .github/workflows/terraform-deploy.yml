@@ -20,6 +20,7 @@ jobs:
     env:
       TF_VAR_app_name: "techchallengefeedback"
       TF_VAR_location: "southafricanorth"
+      TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
       BACKEND_RG_NAME: "rg-techchallengefeedback-state"
       BACKEND_SA_NAME: "sttechchallengefeedback"
       BACKEND_CONTAINER_NAME: "terraform-state"
