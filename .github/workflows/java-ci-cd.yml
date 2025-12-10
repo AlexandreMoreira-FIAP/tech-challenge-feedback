@@ -1,14 +1,12 @@
 name: Java CI/CD - Build & Deploy
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'src/**'
-      - 'pom.xml'
-      - '.github/workflows/java-ci-cd.yml'
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Deploy Projeto na Azure"]
+    branches: [main]
+    types:
+      - completed
 
 permissions:
   id-token: write
@@ -16,6 +14,7 @@ permissions:
 
 jobs:
   build:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Build Java Project
     runs-on: ubuntu-latest
 
@@ -32,12 +31,13 @@ jobs:
 
       - name: Build with Maven
         run: mvn clean package -DskipTests
+        working-directory: ./java
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: java-app
-          path: target/*.jar
+          path: java/target/*.jar
 
   deploy:
     name: Deploy to Azure Web App
@@ -49,7 +49,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: java-app
-          path: target
+          path: .
 
       - name: Login to Azure
         uses: azure/login@v1
@@ -60,4 +60,4 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'app-techchallengefeedback'
-          package: 'target/*.jar'
+          package: 'java/target/*.jar'
