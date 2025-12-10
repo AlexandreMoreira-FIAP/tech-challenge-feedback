@@ -30,7 +30,7 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        run: mvn clean package -DskipTests
+        run: mvn clean package -DskipTests -Dquarkus.package.type=uber-jar
         working-directory: ./java
 
       - name: Upload Artifact
@@ -49,7 +49,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: java-app
-          path: .
+          path: java/target
 
       - name: Login to Azure
         uses: azure/login@v1
@@ -60,4 +60,4 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'app-techchallengefeedback'
-          package: 'java/target/*.jar'
+          package: 'java/target/*-runner.jar'
