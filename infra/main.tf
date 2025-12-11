@@ -84,5 +84,6 @@ resource "azurerm_linux_web_app" "app" {
     "DB_PASSWORD"       = var.db_password
     "WEBSITES_PORT"     = "8080"
     "QUARKUS_HTTP_PORT" = "8080"
+    "WEBSITES_CONTAINER_START_TIME_LIMIT" = "1800"
   }
 }
