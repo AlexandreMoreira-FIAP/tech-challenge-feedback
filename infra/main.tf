@@ -73,8 +73,8 @@ resource "azurerm_linux_web_app" "app" {
       java_server_version = "17"
       java_version        = "17"
     }
-    #ajuste para entender o "*"
-    app_command_line = "sh -c \"java -jar /home/site/wwwroot/*-runner.jar\""
+
+    app_command_line = "java -jar /home/site/wwwroot/app.jar"
   }
 
   # Configurações de ambiente
