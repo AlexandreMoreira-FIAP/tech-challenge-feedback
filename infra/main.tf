@@ -82,8 +82,10 @@ resource "azurerm_linux_web_app" "app" {
     "DB_URL"            = "jdbc:postgresql://${azurerm_postgresql_flexible_server.db_server.fqdn}:5432/feedbackdb"
     "DB_USER"           = "psqladmin"
     "DB_PASSWORD"       = var.db_password
-    "WEBSITES_PORT"     = "8080"
-    "QUARKUS_HTTP_PORT" = "8080"
+    "WEBSITES_PORT"     = "80"
+    "QUARKUS_HTTP_PORT" = "80"
+    "QUARKUS_SWAGGER_UI_ALWAYS_INCLUDE" = "true"
     "WEBSITES_CONTAINER_START_TIME_LIMIT" = "1800"
+
   }
 }
