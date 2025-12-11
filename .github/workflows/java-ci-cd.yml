@@ -51,6 +51,9 @@ jobs:
           name: java-app
           path: java/target
 
+      - name: Rename JAR to app.jar
+        run: mv java/target/*-runner.jar java/target/app.jar
+
       - name: Login to Azure
         uses: azure/login@v1
         with:
@@ -60,4 +63,4 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'app-techchallengefeedback'
-          package: 'java/target/*-runner.jar'
+          package: 'java/target/app.jar'
