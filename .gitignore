@@ -26,3 +26,9 @@ replay_pid*
 
 #git
 *.idea/
+
+
+#env
+.env
+*.env
+local/.env

@@ -1,14 +1,11 @@
 package br.com.fiap.adapter.driver.api.controller;
 
+import br.com.fiap.adapter.driven.infra.AzureQueueAdapter;
 import br.com.fiap.adapter.driven.infra.database.FeedbackRepositoryAdapter;
 import br.com.fiap.adapter.driver.api.request.FeedbackRequest;
 import br.com.fiap.core.domain.model.Feedback;
 import br.com.fiap.core.usecase.CriarFeedbackUseCase;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
@@ -21,14 +18,19 @@ public class FeedbackController {
     private final CriarFeedbackUseCase useCase;
     private final FeedbackRepositoryAdapter repositoryAdapter;
 
-    public FeedbackController(FeedbackRepositoryAdapter repositoryAdapter) {
+    public FeedbackController(FeedbackRepositoryAdapter repositoryAdapter,
+                              AzureQueueAdapter queueAdapter) {
+
         this.repositoryAdapter = repositoryAdapter;
-        this.useCase = new CriarFeedbackUseCase(repositoryAdapter);
+
+        this.useCase = new CriarFeedbackUseCase(repositoryAdapter, queueAdapter);
     }
 
     @POST
     public Response criar(FeedbackRequest request) {
         try {
+
+            System.out.println("Recebendo feedback: " + request.descricao + " com nota: " + request.nota);
             Feedback feedback = new Feedback(request.descricao, request.nota);
 
             Feedback salvo = useCase.executar(feedback);
