@@ -18,14 +18,14 @@ public class FeedbackRepositoryAdapter implements FeedbackRepositoryPort {
 
         entity.persist();
 
-        return feedback;
+        return new Feedback(entity.id, entity.descricao, entity.nota);
     }
 
     @Override
     public List<Feedback> listarTodos() {
         return FeedbackEntity.listAll().stream()
                 .map(obj -> (FeedbackEntity) obj)
-                .map(entity -> new Feedback(entity.descricao, entity.nota))
+                .map(entity -> new Feedback(entity.id, entity.descricao, entity.nota))
                 .collect(Collectors.toList());
     }
 }
