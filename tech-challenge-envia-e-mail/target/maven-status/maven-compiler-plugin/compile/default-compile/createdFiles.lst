@@ -1,0 +1,5 @@
+br\com\fiap\core\port\NotificadorEmailPort.class
+br\com\fiap\adapter\driven\QuarkusMailerAdapter.class
+br\com\fiap\adapter\driver\FeedbackQueueListener.class
+br\com\fiap\core\usecase\ProcessarFeedbackUseCase.class
+br\com\fiap\core\domain\FeedbackDTO.class
