@@ -29,24 +29,33 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      # ----------------------------------------------------------------
       # 1. Build da API (Pasta 'java')
+      # ADICIONADO: -Dquarkus.package.output-name=app
+      # Isso garante que o arquivo final se chame 'app-runner.jar'
+      # ----------------------------------------------------------------
       - name: Build API
-        run: mvn clean package -DskipTests -Dquarkus.package.type=uber-jar
+        run: mvn clean package -DskipTests -Dquarkus.package.type=uber-jar -Dquarkus.package.output-name=app
         working-directory: ./java
 
+      # ----------------------------------------------------------------
       # 2. Build do Worker (Pasta 'tech-challenge-envia-e-mail')
+      # ADICIONADO: -Dquarkus.package.output-name=app
+      # ----------------------------------------------------------------
       - name: Build Email Worker
-        run: mvn clean package -DskipTests -Dquarkus.package.type=uber-jar
+        run: mvn clean package -DskipTests -Dquarkus.package.type=uber-jar -Dquarkus.package.output-name=app
         working-directory: ./tech-challenge-envia-e-mail
 
-      # Upload preservando a estrutura exata das pastas
+      # ----------------------------------------------------------------
+      # UPLOAD: Sobe explicitamente os arquivos 'app-runner.jar'
+      # ----------------------------------------------------------------
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: java-apps
           path: |
-            java/target/*-runner.jar
-            tech-challenge-envia-e-mail/target/*-runner.jar
+            java/target/app-runner.jar
+            tech-challenge-envia-e-mail/target/app-runner.jar
 
   deploy:
     name: Deploy to Azure (Web App & Function)
@@ -58,7 +67,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: java-apps
-          # Baixa mantendo a estrutura original (cria as pastas java/target e tech-challenge.../target)
           path: .
 
       - name: Login to Azure
@@ -70,26 +78,22 @@ jobs:
       # 1. DEPLOY DA API (WEB APP)
       # ----------------------------------------------------------------
       - name: Renomear JAR da API
-        # Entra na pasta da API, pega o runner e vira app.jar (Igual ao exemplo que funcionou)
-        run: mv java/target/*-runner.jar java/target/app.jar
+        run: mv java/target/app-runner.jar java/target/app.jar
 
       - name: Deploy API to Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'app-techchallengefeedback'
-          # Aponta para o arquivo dentro da pasta, igual ao seu exemplo
           package: 'java/target/app.jar'
 
       # ----------------------------------------------------------------
       # 2. DEPLOY DO WORKER (FUNCTION APP)
       # ----------------------------------------------------------------
       - name: Renomear JAR do Worker
-        # Entra na pasta do Worker, pega o runner e vira app.jar
-        run: mv tech-challenge-envia-e-mail/target/*-runner.jar tech-challenge-envia-e-mail/target/app.jar
+        run: mv tech-challenge-envia-e-mail/target/app-runner.jar tech-challenge-envia-e-mail/target/app.jar
 
       - name: Deploy Worker to Function App
         uses: azure/functions-action@v1
         with:
           app-name: 'func-techchallengefeedback'
-          # Aponta para o arquivo dentro da pasta do worker
           package: 'tech-challenge-envia-e-mail/target/app.jar'
