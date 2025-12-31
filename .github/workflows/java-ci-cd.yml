@@ -15,7 +15,7 @@ permissions:
 jobs:
   build:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    name: Build Java Project
+    name: Build Java Projects
     runs-on: ubuntu-latest
 
     steps:
@@ -29,38 +29,82 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build with Maven
+
+      - name: Build API
         run: mvn clean package -DskipTests -Dquarkus.package.type=uber-jar
         working-directory: ./java
 
-      - name: Upload Artifact
+      # ----------------------------------------------------------------
+      # BUILD 2: Worker de Email (Pasta 'tech-challenge-envia-e-mail')
+      # ----------------------------------------------------------------
+      - name: Build Email Worker
+        run: mvn clean package -DskipTests -Dquarkus.package.type=uber-jar
+        working-directory: ./tech-challenge-envia-e-mail
+
+      # ----------------------------------------------------------------
+      # UPLOAD: Sobe tudo mantendo a estrutura de pastas
+      # ----------------------------------------------------------------
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: java-app
-          path: java/target/*.jar
+          name: java-apps
+          # Pega os JARs das duas pastas especificas
+          path: |
+            java/target/*-runner.jar
+            tech-challenge-envia-e-mail/target/*-runner.jar
 
   deploy:
-    name: Deploy to Azure Web App
+    name: Deploy to Azure (Web App & Function)
     runs-on: ubuntu-latest
     needs: build
 
     steps:
-      - name: Download Artifact
+      - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: java-app
-          path: java/target
-
-      - name: Rename JAR to app.jar
-        run: mv java/target/*-runner.jar java/target/app.jar
+          name: java-apps
+          path: build-files
 
       - name: Login to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Deploy to Azure Web App
+      # ----------------------------------------------------------------
+      # 1. DEPLOY DA API (WEB APP)
+      # Origem: java/target
+      # ----------------------------------------------------------------
+      - name: Preparar JAR da API
+        run: |
+          # Copia o JAR da pasta 'java/target' para a raiz com o nome app.jar
+          cp build-files/java/target/*-runner.jar ./app.jar
+          
+          echo "✅ JAR da API preparado:"
+          ls -la app.jar
+
+      - name: Deploy API to Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'app-techchallengefeedback'
-          package: 'java/target/app.jar'
+          package: './app.jar'
+
+      # ----------------------------------------------------------------
+      # 2. DEPLOY DO WORKER (FUNCTION APP)
+      # Origem: tech-challenge-envia-e-mail/target
+      # ----------------------------------------------------------------
+      - name: Preparar JAR do Worker
+        run: |
+          # Apaga o jar anterior (da API) para garantir
+          rm -f app.jar
+          
+          # Copia o JAR da pasta 'tech-challenge-envia-e-mail/target' para a raiz
+          cp build-files/tech-challenge-envia-e-mail/target/*-runner.jar ./app.jar
+          
+          echo "✅ JAR do Worker preparado:"
+          ls -la app.jar
+
+      - name: Deploy Worker to Function App
+        uses: azure/functions-action@v1
+        with:
+          app-name: 'func-techchallengefeedback'
+          package: './app.jar'
