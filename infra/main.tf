@@ -41,7 +41,7 @@ resource "azurerm_storage_account" "sa_app" {
   account_replication_type = "LRS"
 }
 
-#Fila (Queue)
+# Fila (Queue)
 resource "azurerm_storage_queue" "queue" {
   name                 = "feedback-urgente-queue"
   storage_account_name = azurerm_storage_account.sa_app.name
@@ -79,7 +79,7 @@ resource "azurerm_service_plan" "app_plan" {
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   os_type             = "Linux"
-  sku_name            = "B1" # B1 suporta Java Web App
+  sku_name            = "B1"
 }
 
 resource "azurerm_linux_function_app" "fn_app" {
@@ -98,14 +98,17 @@ resource "azurerm_linux_function_app" "fn_app" {
   }
 
   app_settings = {
+    # --- BANCO DE DADOS ---
     "DB_URL"      = "jdbc:postgresql://${azurerm_postgresql_flexible_server.db_server.fqdn}:5432/feedbackdb"
     "DB_USER"     = "psqladmin"
     "DB_PASSWORD" = var.db_password
 
     "AzureWebJobsStorage"     = azurerm_storage_account.sa_app.primary_connection_string
-    "QUEUE_CONNECTION_STRING" = azurerm_storage_account.sa_app.primary_connection_string
+    "AZURE_CONNECTION_STRING" = azurerm_storage_account.sa_app.primary_connection_string
     "QUEUE_NAME"              = azurerm_storage_queue.queue.name
+    "QUEUE_CONNECTION_STRING" = azurerm_storage_account.sa_app.primary_connection_string
 
+    # --- E-MAIL (GMAIL) ---
     "QUARKUS_MAILER_FROM"           = var.email_user
     "QUARKUS_MAILER_HOST"           = "smtp.gmail.com"
     "QUARKUS_MAILER_PORT"           = "587"
@@ -113,7 +116,6 @@ resource "azurerm_linux_function_app" "fn_app" {
     "QUARKUS_MAILER_USERNAME"       = var.email_user
     "QUARKUS_MAILER_PASSWORD"       = var.email_password
     "QUARKUS_MAILER_MOCK"           = "false"
-    "QUARKUS_MAILER_STARTTLS"       = "REQUIRED"
 
     "EMAIL_DESTINATARIO_ADMIN"      = replace(var.email_user, "@", "+teste@")
 
@@ -139,18 +141,22 @@ resource "azurerm_linux_web_app" "app" {
   }
 
   app_settings = {
+    # --- BANCO DE DADOS ---
     "DB_URL"      = "jdbc:postgresql://${azurerm_postgresql_flexible_server.db_server.fqdn}:5432/feedbackdb"
     "DB_USER"     = "psqladmin"
     "DB_PASSWORD" = var.db_password
 
+    # --- CONFIGURAÇÕES WEB ---
     "WEBSITES_PORT"                     = "80"
     "QUARKUS_HTTP_PORT"                 = "80"
     "QUARKUS_SWAGGER_UI_ALWAYS_INCLUDE" = "true"
     "WEBSITES_CONTAINER_START_TIME_LIMIT" = "1800"
 
+    "AZURE_CONNECTION_STRING"         = azurerm_storage_account.sa_app.primary_connection_string
     "AZURE_STORAGE_CONNECTION_STRING" = azurerm_storage_account.sa_app.primary_connection_string
     "QUEUE_NAME"                      = azurerm_storage_queue.queue.name
 
+    # --- MONITORAMENTO ---
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string
   }
 }
