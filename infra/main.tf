@@ -102,10 +102,24 @@ resource "azurerm_linux_function_app" "fn_app" {
     "DB_USER"     = "psqladmin"
     "DB_PASSWORD" = var.db_password
 
-    # Monitoramento
-    "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string
+    "AzureWebJobsStorage"     = azurerm_storage_account.sa_app.primary_connection_string
+    "QUEUE_CONNECTION_STRING" = azurerm_storage_account.sa_app.primary_connection_string
+    "QUEUE_NAME"              = azurerm_storage_queue.queue.name
 
-    "FUNCTIONS_WORKER_RUNTIME" = "java"
+    "QUARKUS_MAILER_FROM"           = var.email_user
+    "QUARKUS_MAILER_HOST"           = "smtp.gmail.com"
+    "QUARKUS_MAILER_PORT"           = "587"
+    "QUARKUS_MAILER_STARTTLS"       = "REQUIRED"
+    "QUARKUS_MAILER_USERNAME"       = var.email_user
+    "QUARKUS_MAILER_PASSWORD"       = var.email_password
+    "QUARKUS_MAILER_MOCK"           = "false"
+    "QUARKUS_MAILER_STARTTLS"       = "REQUIRED"
+
+    "EMAIL_DESTINATARIO_ADMIN"      = replace(var.email_user, "@", "+teste@")
+
+    "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string
+    "FUNCTIONS_WORKER_RUNTIME"              = "java"
+    "FUNCTIONS_EXTENSION_VERSION"           = "~4"
   }
 }
 

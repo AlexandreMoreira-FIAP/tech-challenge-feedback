@@ -2,4 +2,4 @@ C:\Users\user\Desktop\Tech-4\tech-challenge-feedback\tech-challenge-envia-e-mail
 C:\Users\user\Desktop\Tech-4\tech-challenge-feedback\tech-challenge-envia-e-mail\src\main\java\br\com\fiap\adapter\driver\FeedbackQueueListener.java
 C:\Users\user\Desktop\Tech-4\tech-challenge-feedback\tech-challenge-envia-e-mail\src\main\java\br\com\fiap\core\domain\FeedbackDTO.java
 C:\Users\user\Desktop\Tech-4\tech-challenge-feedback\tech-challenge-envia-e-mail\src\main\java\br\com\fiap\core\port\NotificadorEmailPort.java
-C:\Users\user\Desktop\Tech-4\tech-challenge-feedback\tech-challenge-envia-e-mail\src\main\java\br\com\fiap\core\usecase\ProcessarFeedbackUrgenteUseCase.java
+C:\Users\user\Desktop\Tech-4\tech-challenge-feedback\tech-challenge-envia-e-mail\src\main\java\br\com\fiap\core\usecase\ProcessarFeedbackUseCase.java
