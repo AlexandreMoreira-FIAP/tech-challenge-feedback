@@ -29,26 +29,17 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      # ----------------------------------------------------------------
-      # 1. Build da API (Pasta 'java')
-      # ADICIONADO: -Dquarkus.package.output-name=app
-      # Isso garante que o arquivo final se chame 'app-runner.jar'
-      # ----------------------------------------------------------------
+      # 1. Build da API
       - name: Build API
         run: mvn clean package -DskipTests -Dquarkus.package.type=uber-jar -Dquarkus.package.output-name=app
         working-directory: ./java
 
-      # ----------------------------------------------------------------
-      # 2. Build do Worker (Pasta 'tech-challenge-envia-e-mail')
-      # ADICIONADO: -Dquarkus.package.output-name=app
-      # ----------------------------------------------------------------
+      # 2. Build do Worker
       - name: Build Email Worker
         run: mvn clean package -DskipTests -Dquarkus.package.type=uber-jar -Dquarkus.package.output-name=app
         working-directory: ./tech-challenge-envia-e-mail
 
-      # ----------------------------------------------------------------
-      # UPLOAD: Sobe explicitamente os arquivos 'app-runner.jar'
-      # ----------------------------------------------------------------
+      # Upload
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -75,7 +66,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       # ----------------------------------------------------------------
-      # 1. DEPLOY DA API (WEB APP)
+      # 1. DEPLOY DA API (WEB APP) - MANTIDO IGUAL (FUNCIONOU)
       # ----------------------------------------------------------------
       - name: Renomear JAR da API
         run: mv java/target/app-runner.jar java/target/app.jar
@@ -87,13 +78,22 @@ jobs:
           package: 'java/target/app.jar'
 
       # ----------------------------------------------------------------
-      # 2. DEPLOY DO WORKER (FUNCTION APP)
+      # 2. DEPLOY DO WORKER (FUNCTION APP) - AJUSTADO COM ZIP
       # ----------------------------------------------------------------
-      - name: Renomear JAR do Worker
-        run: mv tech-challenge-envia-e-mail/target/app-runner.jar tech-challenge-envia-e-mail/target/app.jar
+      - name: Preparar Worker (Renomear e Zipar)
+        run: |
+          # 1. Renomeia para app.jar
+          mv tech-challenge-envia-e-mail/target/app-runner.jar tech-challenge-envia-e-mail/target/app.jar
+          
+          # 2. TRUQUE: Cria um ZIP contendo apenas o app.jar
+          # O parâmetro -j (junk paths) garante que não crie pastas dentro do zip, apenas o arquivo
+          zip -j worker.zip tech-challenge-envia-e-mail/target/app.jar
+          
+          echo "✅ Zip criado com sucesso:"
+          ls -la worker.zip
 
       - name: Deploy Worker to Function App
         uses: azure/functions-action@v1
         with:
           app-name: 'func-techchallengefeedback'
-          package: 'tech-challenge-envia-e-mail/target/app.jar'
+          package: './worker.zip'
