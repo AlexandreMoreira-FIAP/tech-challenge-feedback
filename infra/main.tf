@@ -95,8 +95,7 @@ resource "azurerm_linux_function_app" "fn_app" {
     application_stack {
       java_version = "17"
     }
-    # Força a execução do Uber-Jar (Modo Standalone)
-    app_command_line = "java -jar /home/site/wwwroot/app.jar"
+    app_command_line = "/usr/lib/jvm/msft-17-x64/bin/java -jar /home/site/wwwroot/app.jar"
   }
 
   app_settings = {
