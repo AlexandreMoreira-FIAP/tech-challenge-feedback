@@ -98,7 +98,7 @@ resource "azurerm_linux_web_app" "app" {
   }
 
   app_settings = {
-    "DB_URL"                                = "jdbc:postgresql://${azurerm_postgresql_flexible_server.db_server.fqdn}:5432/feedbackdb"
+    "DB_URL"                                = "jdbc:postgresql://${azurerm_postgresql_flexible_server.db_server.fqdn}:5432/feedbackdb?sslmode=require"
     "DB_USER"                               = "psqladmin"
     "DB_PASSWORD"                           = var.db_password
     "WEBSITES_PORT"                         = "80"
@@ -159,7 +159,7 @@ resource "azurerm_linux_function_app" "fn_app" {
   }
 
   app_settings = {
-    "DB_URL"                                = "jdbc:postgresql://${azurerm_postgresql_flexible_server.db_server.fqdn}:5432/feedbackdb"
+    "DB_URL"                                = "jdbc:postgresql://${azurerm_postgresql_flexible_server.db_server.fqdn}:5432/feedbackdb?sslmode=require"
     "DB_USER"                               = "psqladmin"
     "DB_PASSWORD"                           = var.db_password
     "AzureWebJobsStorage"                   = azurerm_storage_account.sa_app.primary_connection_string
