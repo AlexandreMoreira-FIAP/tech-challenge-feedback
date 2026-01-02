@@ -29,6 +29,9 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Install Azure Functions Core Tools
+        run: npm i -g azure-functions-core-tools@4 --unsafe-perm true
+
       - name: Build API
         run: mvn clean package -DskipTests -Dquarkus.package.type=uber-jar -Dquarkus.package.output-name=app
         working-directory: ./java
