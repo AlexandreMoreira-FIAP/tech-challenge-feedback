@@ -170,6 +170,13 @@ resource "azurerm_linux_function_app" "fn_app" {
     application_stack {
       java_version = "17"
     }
+    cors {
+      allowed_origins = [
+        "https://portal.azure.com",
+        "https://ms.portal.azure.com"
+      ]
+      support_credentials = true
+    }
   }
 
   app_settings = {
