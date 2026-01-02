@@ -1,21 +1,28 @@
 package br.com.fiap.core.domain.model;
 
+import java.time.LocalDateTime; // Importação correta
+
 public class Feedback {
 
-    private Long id; // Adicionado: Identificador único
+    private Long id;
     private String descricao;
     private Integer nota;
+    private LocalDateTime dataCriacao;
 
     public Feedback(String descricao, Integer nota) {
         validarNota(nota);
         this.descricao = descricao;
         this.nota = nota;
+        this.dataCriacao = LocalDateTime.now();
     }
 
-    public Feedback(Long id, String descricao, Integer nota) {
-        this(descricao, nota); // Reaproveita a validação do construtor de cima
+    public Feedback(Long id, String descricao, Integer nota, LocalDateTime dataCriacao) {
+        this(descricao, nota);
         this.id = id;
+        this.dataCriacao = dataCriacao;
     }
+
+    public Feedback() {}
 
     private void validarNota(Integer nota) {
         if (nota == null) {
@@ -35,4 +42,7 @@ public class Feedback {
 
     public String getDescricao() { return descricao; }
     public Integer getNota() { return nota; }
+
+    public LocalDateTime getDataCriacao() { return dataCriacao; }
+    public void setDataCriacao(LocalDateTime dataCriacao) { this.dataCriacao = dataCriacao; }
 }
