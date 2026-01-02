@@ -34,7 +34,7 @@ resource "azurerm_application_insights" "app_insights" {
 }
 
 resource "azurerm_storage_account" "sa_app" {
-  name                     = "st${replace(var.app_name, "-", "")}app"
+  name                     = "st${substr(replace(var.app_name, "-", ""), 0, 15)}v1"
   resource_group_name      = azurerm_resource_group.rg.name
   location                 = azurerm_resource_group.rg.location
   account_tier             = "Standard"
@@ -187,6 +187,8 @@ resource "azurerm_linux_function_app" "fn_app" {
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string
     "FUNCTIONS_WORKER_RUNTIME"              = "java"
     "FUNCTIONS_EXTENSION_VERSION"           = "~4"
-    "JAVA_OPTS"                             = "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+    "JAVA_OPTS"                             = "-XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xmx512m"
+    "WEBSITE_RUN_FROM_PACKAGE"              = "1"
+    "SCM_DO_BUILD_DURING_DEPLOYMENT"        = "false"
   }
 }
