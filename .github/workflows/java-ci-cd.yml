@@ -91,23 +91,31 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Renomear API JAR
-        run: mv api/app-runner.jar api/app.jar
+      - name: Preparar e Zipar API
+        run: |
+          cd api
+          mv app-runner.jar app.jar
+          zip api-package.zip app.jar
+          cd ..
 
       - name: Deploy API
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'app-techchallengefeedback'
-          package: 'api/app.jar'
+          package: 'api/api-package.zip'
 
-      - name: Renomear Worker JAR
-        run: mv worker/app-runner.jar worker/app.jar
+      - name: Preparar e Zipar Worker
+        run: |
+          cd worker
+          mv app-runner.jar app.jar
+          zip worker-package.zip app.jar
+          cd ..
 
       - name: Deploy Worker
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'worker-techchallengefeedback'
-          package: 'worker/app.jar'
+          package: 'worker/worker-package.zip'
 
       - name: Preparar Relatorio (Zipar Conteúdo)
         run: |
