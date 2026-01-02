@@ -93,35 +93,57 @@ jobs:
 
       - name: Preparar e Zipar API
         run: |
-          cd api
-          mv app-runner.jar app.jar
+          echo "📂 Listando arquivos baixados para debug:"
+          ls -R api
+          
+          echo "🔍 Procurando o JAR..."
+          # Encontra o arquivo jar, não importa a subpasta
+          JAR_PATH=$(find api -name "*runner.jar" -type f | head -n 1)
+          echo "Jar encontrado em: $JAR_PATH"
+          
+          # Move para a raiz com o nome correto
+          mv "$JAR_PATH" app.jar
+          
+          # Cria o zip apenas com o app.jar na raiz
           zip api-package.zip app.jar
-          cd ..
+          
+          echo "📦 Conteúdo do ZIP gerado:"
+          unzip -l api-package.zip
 
       - name: Deploy API
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'app-techchallengefeedback'
-          package: 'api/api-package.zip'
+          package: 'api-package.zip'
 
       - name: Preparar e Zipar Worker
         run: |
-          cd worker
-          mv app-runner.jar app.jar
+          echo "📂 Listando arquivos baixados para debug:"
+          ls -R worker
+
+          echo "🔍 Procurando o JAR..."
+          JAR_PATH=$(find worker -name "*runner.jar" -type f | head -n 1)
+          echo "Jar encontrado em: $JAR_PATH"
+          
+          mv "$JAR_PATH" app.jar
           zip worker-package.zip app.jar
-          cd ..
+          
+          echo "📦 Conteúdo do ZIP gerado:"
+          unzip -l worker-package.zip
 
       - name: Deploy Worker
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'worker-techchallengefeedback'
-          package: 'worker/worker-package.zip'
+          package: 'worker-package.zip'
 
       - name: Preparar Relatorio (Zipar Conteúdo)
         run: |
           cd relatorio
+          # Zipa o conteúdo da pasta (onde estão as functions)
           zip -r ../relatorio.zip .
           cd ..
+          echo "📦 Verificando zip criado:"
           ls -la relatorio.zip
 
       - name: Deploy Relatorio Function
