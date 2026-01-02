@@ -29,71 +29,92 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      # 1. Build da API
       - name: Build API
         run: mvn clean package -DskipTests -Dquarkus.package.type=uber-jar -Dquarkus.package.output-name=app
         working-directory: ./java
 
-      # 2. Build do Worker
       - name: Build Email Worker
         run: mvn clean package -DskipTests -Dquarkus.package.type=uber-jar -Dquarkus.package.output-name=app
         working-directory: ./tech-challenge-envia-e-mail
 
-      # Upload
-      - name: Upload Artifacts
+      - name: Build Relatorio Function
+        run: mvn clean package -DskipTests
+        working-directory: ./tech-challenge-relatorio
+
+      - name: Upload API Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: java-apps
-          path: |
-            java/target/app-runner.jar
-            tech-challenge-envia-e-mail/target/app-runner.jar
+          name: api-app
+          path: java/target/app-runner.jar
+
+      - name: Upload Worker Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: worker-app
+          path: tech-challenge-envia-e-mail/target/app-runner.jar
+
+      - name: Upload Relatorio Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-func
+          path: tech-challenge-relatorio/target/azure-functions/tech-challenge-relatorio
 
   deploy:
-    name: Deploy to Azure (Web App & Function)
+    name: Deploy to Azure
     runs-on: ubuntu-latest
     needs: build
 
     steps:
-      - name: Download Artifacts
+      - name: Download API
         uses: actions/download-artifact@v4
         with:
-          name: java-apps
-          path: .
+          name: api-app
+          path: api
+
+      - name: Download Worker
+        uses: actions/download-artifact@v4
+        with:
+          name: worker-app
+          path: worker
+
+      - name: Download Relatorio
+        uses: actions/download-artifact@v4
+        with:
+          name: relatorio-func
+          path: relatorio
 
       - name: Login to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # ----------------------------------------------------------------
-      # 1. DEPLOY DA API (WEB APP) - MANTIDO IGUAL (FUNCIONOU)
-      # ----------------------------------------------------------------
-      - name: Renomear JAR da API
-        run: mv java/target/app-runner.jar java/target/app.jar
+      - name: Renomear API JAR
+        run: mv api/app-runner.jar api/app.jar
 
-      - name: Deploy API to Web App
+      - name: Deploy API
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'app-techchallengefeedback'
-          package: 'java/target/app.jar'
+          package: 'api/app.jar'
 
-      # ----------------------------------------------------------------
-      # 2. DEPLOY DO WORKER (FUNCTION APP) - AJUSTADO COM ZIP
-      # ----------------------------------------------------------------
-      - name: Preparar Worker (Renomear e Zipar)
-        run: |
-          # 1. Renomeia para app.jar
-          mv tech-challenge-envia-e-mail/target/app-runner.jar tech-challenge-envia-e-mail/target/app.jar
-          
-          # 2. TRUQUE: Cria um ZIP contendo apenas o app.jar
-          # O parâmetro -j (junk paths) garante que não crie pastas dentro do zip, apenas o arquivo
-          zip -j worker.zip tech-challenge-envia-e-mail/target/app.jar
-          
-          echo "✅ Zip criado com sucesso:"
-          ls -la worker.zip
+      - name: Renomear Worker JAR
+        run: mv worker/app-runner.jar worker/app.jar
 
-      - name: Deploy Worker to Function App
+      - name: Deploy Worker
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'worker-techchallengefeedback'
+          package: 'worker/app.jar'
+
+      - name: Preparar Relatorio (Zipar Conteúdo)
+        run:
+          cd relatorio
+          zip -r ../relatorio.zip .
+          cd ..
+          ls -la relatorio.zip
+
+      - name: Deploy Relatorio Function
         uses: azure/functions-action@v1
         with:
           app-name: 'func-techchallengefeedback'
-          package: './worker.zip'
+          package: './relatorio.zip' # Agora aponta para o ZIP criado
