@@ -81,7 +81,6 @@ resource "azurerm_service_plan" "app_plan" {
   sku_name            = "B1"
 }
 
-# 1. API PRINCIPAL (Web App)
 resource "azurerm_linux_web_app" "app" {
   name                = "app-${var.app_name}"
   resource_group_name = azurerm_resource_group.rg.name
@@ -89,6 +88,7 @@ resource "azurerm_linux_web_app" "app" {
   service_plan_id     = azurerm_service_plan.app_plan.id
 
   site_config {
+    always_on = true
     application_stack {
       java_server         = "JAVA"
       java_server_version = "17"
@@ -98,12 +98,13 @@ resource "azurerm_linux_web_app" "app" {
   }
 
   app_settings = {
-    "DB_URL"      = "jdbc:postgresql://${azurerm_postgresql_flexible_server.db_server.fqdn}:5432/feedbackdb"
-    "DB_USER"     = "psqladmin"
-    "DB_PASSWORD" = var.db_password
-    "WEBSITES_PORT" = "80"
-    "AZURE_CONNECTION_STRING" = azurerm_storage_account.sa_app.primary_connection_string
-    "QUEUE_NAME"              = azurerm_storage_queue.queue.name
+    "DB_URL"                                = "jdbc:postgresql://${azurerm_postgresql_flexible_server.db_server.fqdn}:5432/feedbackdb"
+    "DB_USER"                               = "psqladmin"
+    "DB_PASSWORD"                           = var.db_password
+    "WEBSITES_PORT"                         = "80"
+    "WEBSITE_RUN_FROM_PACKAGE"              = "1"
+    "AZURE_CONNECTION_STRING"               = azurerm_storage_account.sa_app.primary_connection_string
+    "QUEUE_NAME"                            = azurerm_storage_queue.queue.name
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string
   }
 }
@@ -115,6 +116,7 @@ resource "azurerm_linux_web_app" "worker" {
   service_plan_id     = azurerm_service_plan.app_plan.id
 
   site_config {
+    always_on = true
     application_stack {
       java_server         = "JAVA"
       java_server_version = "17"
@@ -124,16 +126,17 @@ resource "azurerm_linux_web_app" "worker" {
   }
 
   app_settings = {
-    "AZURE_CONNECTION_STRING" = azurerm_storage_account.sa_app.primary_connection_string
-    "QUEUE_NAME"              = azurerm_storage_queue.queue.name
-    "QUARKUS_MAILER_FROM"      = var.email_user
-    "QUARKUS_MAILER_HOST"      = "smtp.gmail.com"
-    "QUARKUS_MAILER_PORT"      = "587"
-    "QUARKUS_MAILER_STARTTLS"  = "REQUIRED"
-    "QUARKUS_MAILER_USERNAME"  = var.email_user
-    "QUARKUS_MAILER_PASSWORD"  = var.email_password
-    "QUARKUS_MAILER_MOCK"      = "false"
-    "EMAIL_DESTINATARIO_ADMIN" = var.email_user
+    "WEBSITE_RUN_FROM_PACKAGE"              = "1"
+    "AZURE_CONNECTION_STRING"               = azurerm_storage_account.sa_app.primary_connection_string
+    "QUEUE_NAME"                            = azurerm_storage_queue.queue.name
+    "QUARKUS_MAILER_FROM"                   = var.email_user
+    "QUARKUS_MAILER_HOST"                   = "smtp.gmail.com"
+    "QUARKUS_MAILER_PORT"                   = "587"
+    "QUARKUS_MAILER_STARTTLS"               = "REQUIRED"
+    "QUARKUS_MAILER_USERNAME"               = var.email_user
+    "QUARKUS_MAILER_PASSWORD"               = var.email_password
+    "QUARKUS_MAILER_MOCK"                   = "false"
+    "EMAIL_DESTINATARIO_ADMIN"              = var.email_user
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string
   }
 }
@@ -148,6 +151,7 @@ resource "azurerm_linux_function_app" "fn_app" {
   storage_account_access_key = azurerm_storage_account.sa_app.primary_access_key
 
   site_config {
+    always_on = true
     application_stack {
       java_version = "17"
     }
@@ -155,17 +159,17 @@ resource "azurerm_linux_function_app" "fn_app" {
   }
 
   app_settings = {
-    "DB_URL"      = "jdbc:postgresql://${azurerm_postgresql_flexible_server.db_server.fqdn}:5432/feedbackdb"
-    "DB_USER"     = "psqladmin"
-    "DB_PASSWORD" = var.db_password
-    "AzureWebJobsStorage"     = azurerm_storage_account.sa_app.primary_connection_string
-    "QUARKUS_MAILER_FROM"      = var.email_user
-    "QUARKUS_MAILER_HOST"      = "smtp.gmail.com"
-    "QUARKUS_MAILER_PORT"      = "587"
-    "QUARKUS_MAILER_STARTTLS"  = "REQUIRED"
-    "QUARKUS_MAILER_USERNAME"  = var.email_user
-    "QUARKUS_MAILER_PASSWORD"  = var.email_password
-    "QUARKUS_MAILER_MOCK"      = "false"
+    "DB_URL"                                = "jdbc:postgresql://${azurerm_postgresql_flexible_server.db_server.fqdn}:5432/feedbackdb"
+    "DB_USER"                               = "psqladmin"
+    "DB_PASSWORD"                           = var.db_password
+    "AzureWebJobsStorage"                   = azurerm_storage_account.sa_app.primary_connection_string
+    "QUARKUS_MAILER_FROM"                   = var.email_user
+    "QUARKUS_MAILER_HOST"                   = "smtp.gmail.com"
+    "QUARKUS_MAILER_PORT"                   = "587"
+    "QUARKUS_MAILER_STARTTLS"               = "REQUIRED"
+    "QUARKUS_MAILER_USERNAME"               = var.email_user
+    "QUARKUS_MAILER_PASSWORD"               = var.email_password
+    "QUARKUS_MAILER_MOCK"                   = "false"
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string
     "FUNCTIONS_WORKER_RUNTIME"              = "java"
     "FUNCTIONS_EXTENSION_VERSION"           = "~4"
