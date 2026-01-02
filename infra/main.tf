@@ -34,7 +34,7 @@ resource "azurerm_application_insights" "app_insights" {
 }
 
 resource "azurerm_storage_account" "sa_app" {
-  name                     = "st${replace(var.app_name, "-", "")}final"
+  name                     = "st${replace(var.app_name, "-", "")}app"
   resource_group_name      = azurerm_resource_group.rg.name
   location                 = azurerm_resource_group.rg.location
   account_tier             = "Standard"
