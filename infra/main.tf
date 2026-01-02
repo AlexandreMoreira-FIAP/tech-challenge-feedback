@@ -34,7 +34,7 @@ resource "azurerm_application_insights" "app_insights" {
 }
 
 resource "azurerm_storage_account" "sa_app" {
-  name                     = "st${replace(var.app_name, "-", "")}2"
+  name                     = "st${replace(var.app_name, "-", "")}final"
   resource_group_name      = azurerm_resource_group.rg.name
   location                 = azurerm_resource_group.rg.location
   account_tier             = "Standard"
@@ -47,7 +47,7 @@ resource "azurerm_storage_queue" "queue" {
 }
 
 resource "azurerm_postgresql_flexible_server" "db_server" {
-  name                   = "psql-${var.app_name}"
+  name                   = "psql-${var.app_name}-v2"
   resource_group_name    = azurerm_resource_group.rg.name
   location               = azurerm_resource_group.rg.location
   version                = "13"
@@ -73,8 +73,8 @@ resource "azurerm_postgresql_flexible_server_firewall_rule" "allow_azure" {
   end_ip_address   = "0.0.0.0"
 }
 
-resource "azurerm_service_plan" "app_plan" {
-  name                = "plan-${var.app_name}"
+resource "azurerm_service_plan" "api_plan" {
+  name                = "plan-api-${var.app_name}"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   os_type             = "Linux"
@@ -84,8 +84,8 @@ resource "azurerm_service_plan" "app_plan" {
 resource "azurerm_linux_web_app" "app" {
   name                = "app-${var.app_name}"
   resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_service_plan.app_plan.location
-  service_plan_id     = azurerm_service_plan.app_plan.id
+  location            = azurerm_service_plan.api_plan.location
+  service_plan_id     = azurerm_service_plan.api_plan.id
 
   site_config {
     always_on = true
@@ -109,11 +109,19 @@ resource "azurerm_linux_web_app" "app" {
   }
 }
 
+resource "azurerm_service_plan" "worker_plan" {
+  name                = "plan-worker-${var.app_name}"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  os_type             = "Linux"
+  sku_name            = "B1"
+}
+
 resource "azurerm_linux_web_app" "worker" {
   name                = "worker-${var.app_name}"
   resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_service_plan.app_plan.location
-  service_plan_id     = azurerm_service_plan.app_plan.id
+  location            = azurerm_service_plan.worker_plan.location
+  service_plan_id     = azurerm_service_plan.worker_plan.id
 
   site_config {
     always_on = true
@@ -141,21 +149,27 @@ resource "azurerm_linux_web_app" "worker" {
   }
 }
 
+resource "azurerm_service_plan" "function_plan" {
+  name                = "plan-func-${var.app_name}"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  os_type             = "Linux"
+  sku_name            = "Y1"
+}
+
 resource "azurerm_linux_function_app" "fn_app" {
   name                = "func-${var.app_name}"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
-  service_plan_id     = azurerm_service_plan.app_plan.id
+  service_plan_id     = azurerm_service_plan.function_plan.id
 
   storage_account_name       = azurerm_storage_account.sa_app.name
   storage_account_access_key = azurerm_storage_account.sa_app.primary_access_key
 
   site_config {
-    always_on = true
     application_stack {
       java_version = "17"
     }
-    app_command_line = "/usr/lib/jvm/msft-17-x64/bin/java -jar /home/site/wwwroot/app.jar"
   }
 
   app_settings = {
@@ -173,5 +187,6 @@ resource "azurerm_linux_function_app" "fn_app" {
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string
     "FUNCTIONS_WORKER_RUNTIME"              = "java"
     "FUNCTIONS_EXTENSION_VERSION"           = "~4"
+    "JAVA_OPTS"                             = "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
   }
 }
