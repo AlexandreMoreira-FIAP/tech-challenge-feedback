@@ -3,7 +3,7 @@ package br.com.fiap.adapter.driven.infra.email;
 import br.com.fiap.core.usecase.port.NotificacaoPort;
 import io.quarkus.mailer.Mail;
 import io.quarkus.mailer.Mailer;
-import io.quarkus.logging.Log; // <--- O Importante está aqui
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -14,25 +14,31 @@ public class MailerAdapter implements NotificacaoPort {
     @Inject
     Mailer mailer;
 
+    @ConfigProperty(name = "quarkus.mailer.from")
+    String remetente;
+
     @ConfigProperty(name = "quarkus.mailer.mock", defaultValue = "false")
     boolean isMock;
 
     @Override
     public void enviarRelatorio(String destinatario, String assunto, String mensagemHtml) {
         try {
-            mailer.send(Mail.withHtml(destinatario, assunto, mensagemHtml));
 
-            Log.info("✅ [EMAIL] Sucesso! Relatório enviado para: " + destinatario);
+            Mail email = Mail.withHtml(destinatario, assunto, mensagemHtml)
+                    .setFrom(remetente);
 
-            // SE estivermos em modo Mock (Azure/Dev), logamos o HTML para prova no vídeo
+            mailer.send(email);
+
+            Log.info("✅ [EMAIL] Sucesso! Relatório enviado de " + remetente + " para " + destinatario);
+
             if (isMock) {
-                Log.info("📝 [CONTEÚDO DO EMAIL - MOCK START] --------------------------------");
+                Log.info("📝 [CONTEÚDO MOCK] --------------------------------");
                 Log.info(mensagemHtml);
-                Log.info("📝 [CONTEÚDO DO EMAIL - MOCK END] ----------------------------------");
+                Log.info("----------------------------------------------------");
             }
 
         } catch (Exception e) {
-            Log.error("❌ [EMAIL] Falha ao enviar relatório: " + e.getMessage(), e);
+            Log.error("❌ [EMAIL] Falha crítica ao enviar relatório: " + e.getMessage(), e);
         }
     }
 }
