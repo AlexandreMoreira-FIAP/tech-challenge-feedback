@@ -78,7 +78,7 @@ resource "azurerm_service_plan" "api_plan" {
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   os_type             = "Linux"
-  sku_name            = "B1"
+  sku_name            = "B3"
 }
 
 resource "azurerm_linux_web_app" "app" {
@@ -94,7 +94,7 @@ resource "azurerm_linux_web_app" "app" {
       java_server_version = "17"
       java_version        = "17"
     }
-    app_command_line = "java -Xmx1024m -Xms1024m -jar /home/site/wwwroot/app.jar"
+    app_command_line = "java -jar /home/site/wwwroot/app.jar"
   }
 
   app_settings = {
@@ -106,7 +106,6 @@ resource "azurerm_linux_web_app" "app" {
     "AZURE_CONNECTION_STRING"               = azurerm_storage_account.sa_app.primary_connection_string
     "QUEUE_NAME"                            = azurerm_storage_queue.queue.name
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string
-    "JAVA_OPTS"                             = "-Xmx1024m -Xms1024m"
   }
 }
 
@@ -115,7 +114,7 @@ resource "azurerm_service_plan" "worker_plan" {
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   os_type             = "Linux"
-  sku_name            = "B1"
+  sku_name            = "B3"
 }
 
 resource "azurerm_linux_web_app" "worker" {
@@ -131,7 +130,7 @@ resource "azurerm_linux_web_app" "worker" {
       java_server_version = "17"
       java_version        = "17"
     }
-    app_command_line = "java -Xmx1024m -Xms1024m -jar /home/site/wwwroot/app.jar"
+    app_command_line = "java -jar /home/site/wwwroot/app.jar"
   }
 
   app_settings = {
@@ -147,7 +146,6 @@ resource "azurerm_linux_web_app" "worker" {
     "QUARKUS_MAILER_MOCK"                   = "false"
     "EMAIL_DESTINATARIO_ADMIN"              = var.email_user
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string
-    "JAVA_OPTS"                             = "-Xmx1024m -Xms1024m"
     "WEBSITES_PORT"                         = "8080"
   }
 }
