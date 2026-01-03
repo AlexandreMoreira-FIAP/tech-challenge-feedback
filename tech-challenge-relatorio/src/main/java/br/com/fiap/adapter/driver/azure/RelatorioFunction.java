@@ -13,7 +13,7 @@ public class RelatorioFunction {
 
     @FunctionName("RelatorioSemanal")
     public void run(
-            @TimerTrigger(name = "timerInfo", schedule = "0 */2 * * * *") String timerInfo,
+            @TimerTrigger(name = "timerInfo", schedule = "0 */10 * * * *") String timerInfo,
             ExecutionContext context
     ) {
         context.getLogger().info("⏰ Iniciando Relatório Semanal Serverless...");
