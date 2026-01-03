@@ -4,8 +4,10 @@ import br.com.fiap.core.domain.model.Feedback;
 import br.com.fiap.core.usecase.port.NotificadorPort;
 import com.azure.storage.queue.QueueClient;
 import com.azure.storage.queue.QueueClientBuilder;
-import com.azure.storage.queue.models.QueueStorageException; // Importante para pegar o erro específico
+import com.azure.storage.queue.models.QueueStorageException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature; // IMPORTEI ISSO
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule; // IMPORTEI ISSO
 import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -27,6 +29,10 @@ public class AzureQueueAdapter implements NotificadorPort {
                     .buildClient();
 
             ObjectMapper mapper = new ObjectMapper();
+
+            mapper.registerModule(new JavaTimeModule());
+            mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
             String mensagemJson = mapper.writeValueAsString(feedback);
             queueClient.sendMessage(mensagemJson);
 
