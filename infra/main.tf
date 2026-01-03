@@ -55,7 +55,7 @@ resource "azurerm_postgresql_flexible_server" "db_server" {
   administrator_password = var.db_password
   storage_mb             = 32768
   storage_tier           = "P4"
-  sku_name               = "B_Standard_B1ms"
+  sku_name               = "B_Standard_B2s"
   zone                   = "1"
 }
 
