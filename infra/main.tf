@@ -145,7 +145,7 @@ resource "azurerm_linux_web_app" "worker" {
     "QUARKUS_MAILER_STARTTLS"               = "REQUIRED"
     "QUARKUS_MAILER_USERNAME"               = var.email_user
     "QUARKUS_MAILER_PASSWORD"               = var.email_password
-    "QUARKUS_MAILER_MOCK"                   = "false"
+    "QUARKUS_MAILER_MOCK"                   = "true"
     "EMAIL_DESTINATARIO_ADMIN"              = var.email_user
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string
     "WEBSITES_PORT"                         = "80"
@@ -195,7 +195,7 @@ resource "azurerm_linux_function_app" "fn_app" {
     "QUARKUS_MAILER_STARTTLS"               = "REQUIRED"
     "QUARKUS_MAILER_USERNAME"               = var.email_user
     "QUARKUS_MAILER_PASSWORD"               = var.email_password
-    "QUARKUS_MAILER_MOCK"                   = "false"
+    "QUARKUS_MAILER_MOCK"                   = "true"
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string
     "FUNCTIONS_WORKER_RUNTIME"              = "java"
     "FUNCTIONS_EXTENSION_VERSION"           = "~4"

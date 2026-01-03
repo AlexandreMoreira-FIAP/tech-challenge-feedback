@@ -10,7 +10,7 @@ import java.util.List;
 public class ProcessarFeedbackUseCase {
 
     private final NotificadorEmailPort notificador;
-    
+
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     public ProcessarFeedbackUseCase(NotificadorEmailPort notificador) {
