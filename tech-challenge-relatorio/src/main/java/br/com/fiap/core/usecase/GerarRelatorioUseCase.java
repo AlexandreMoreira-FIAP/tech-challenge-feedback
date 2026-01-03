@@ -6,6 +6,7 @@ import br.com.fiap.core.usecase.port.NotificacaoPort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -21,6 +22,9 @@ public class GerarRelatorioUseCase {
 
     @Inject
     NotificacaoPort notificacaoPort;
+
+    @ConfigProperty(name = "email.destinatario.admin", defaultValue = "alexandre.dellaestudos@gmail.com")
+    String emailDestino;
 
     @Transactional
     public void executar() {
@@ -65,7 +69,7 @@ public class GerarRelatorioUseCase {
         html.append("<tr style='background-color: #2c3e50; color: white;'><th>Data</th><th>Status</th><th>Nota</th><th>Descrição</th></tr>");
 
         for (Feedback f : feedbacks) {
-            String corNota = f.isUrgente() ? "#c0392b" : "#27ae60"; // Vermelho se urgente, Verde se normal
+            String corNota = f.isUrgente() ? "#c0392b" : "#27ae60";
             String statusIcon = f.isUrgente() ? "🔴 URGENTE" : "🟢 Normal";
             String dataFormatada = f.dataCriacao != null ? f.dataCriacao.format(dataFmt) : "N/A";
 
@@ -81,6 +85,6 @@ public class GerarRelatorioUseCase {
         html.append("<br><p style='font-size: 12px; color: #7f8c8d;'><i>Relatório gerado automaticamente via Azure Functions.</i></p>");
         html.append("</body></html>");
 
-        notificacaoPort.enviarRelatorio("admin@fiap.com.br", "📊 Relatório Semanal Completo", html.toString());
+        notificacaoPort.enviarRelatorio(emailDestino, "📊 Relatório Semanal Completo", html.toString());
     }
 }

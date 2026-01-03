@@ -3,13 +3,17 @@ package br.com.fiap.core.usecase;
 import br.com.fiap.core.domain.FeedbackDTO;
 import br.com.fiap.core.port.NotificadorEmailPort;
 import jakarta.enterprise.context.ApplicationScoped;
-import java.time.format.DateTimeFormatter; // Importante para formatar a data
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @ApplicationScoped
 public class ProcessarFeedbackUseCase {
 
     private final NotificadorEmailPort notificador;
+
+    @ConfigProperty(name = "email.destinatario.admin", defaultValue = "alexandre.dellaestudos@gmail.com")
+    String emailDestino;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
@@ -31,7 +35,7 @@ public class ProcessarFeedbackUseCase {
         html.append("<table border='1' cellpadding='5' style='border-collapse: collapse; width: 100%; text-align: left;'>");
         html.append("<tr style='background-color: #f2f2f2;'>");
         html.append("<th>ID</th>");
-        html.append("<th>Data</th>"); // Nova Coluna
+        html.append("<th>Data</th>");
         html.append("<th>Nota</th>");
         html.append("<th>Descrição</th>");
         html.append("</tr>");
@@ -41,7 +45,7 @@ public class ProcessarFeedbackUseCase {
 
             html.append("<tr>");
             html.append("<td>").append(f.id).append("</td>");
-            html.append("<td>").append(dataFormatada).append("</td>"); // Valor da Data
+            html.append("<td>").append(dataFormatada).append("</td>");
             html.append("<td style='color: red; font-weight: bold;'>").append(f.nota).append("</td>");
             html.append("<td>").append(f.descricao).append("</td>");
             html.append("</tr>");
@@ -51,6 +55,6 @@ public class ProcessarFeedbackUseCase {
         html.append("<br><p><i>Enviado automaticamente pelo Worker de Processamento.</i></p>");
         html.append("</body></html>");
 
-        notificador.enviarEmail("admin@fiap.com.br", assunto, html.toString());
+        notificador.enviarEmail(emailDestino, assunto, html.toString());
     }
 }
