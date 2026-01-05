@@ -91,11 +91,10 @@ jobs:
       - name: Preparar e Zipar API
         run: |
           JAR_PATH=$(find api -name "*runner.jar" -type f | head -n 1)
-          if [ -z "$JAR_PATH" ]; then
-            exit 1
-          fi
-          cp "$JAR_PATH" app.jar
-          zip -j api-package.zip app.jar
+          if [ -z "$JAR_PATH" ]; then exit 1; fi
+          mv "$JAR_PATH" app.jar
+          zip api-package.zip app.jar
+          unzip -l api-package.zip
 
       - name: Deploy API
         uses: azure/webapps-deploy@v3
@@ -106,11 +105,10 @@ jobs:
       - name: Preparar e Zipar Worker Fila
         run: |
           JAR_PATH=$(find worker -name "*runner.jar" -type f | head -n 1)
-          if [ -z "$JAR_PATH" ]; then
-            exit 1
-          fi
-          cp "$JAR_PATH" app.jar
-          zip -j worker-package.zip app.jar
+          if [ -z "$JAR_PATH" ]; then exit 1; fi
+          mv "$JAR_PATH" app.jar
+          zip worker-package.zip app.jar
+          unzip -l worker-package.zip
 
       - name: Deploy Worker Fila
         uses: azure/webapps-deploy@v3
@@ -121,11 +119,10 @@ jobs:
       - name: Preparar e Zipar Worker Relatorio
         run: |
           JAR_PATH=$(find relatorio -name "*runner.jar" -type f | head -n 1)
-          if [ -z "$JAR_PATH" ]; then
-            exit 1
-          fi
-          cp "$JAR_PATH" app.jar
-          zip -j relatorio-package.zip app.jar
+          if [ -z "$JAR_PATH" ]; then exit 1; fi
+          mv "$JAR_PATH" app.jar
+          zip relatorio-package.zip app.jar
+          unzip -l relatorio-package.zip
 
       - name: Deploy Worker Relatorio
         uses: azure/webapps-deploy@v3
