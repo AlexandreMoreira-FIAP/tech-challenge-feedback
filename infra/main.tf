@@ -104,7 +104,6 @@ resource "azurerm_linux_web_app" "app" {
     "WEBSITES_PORT"                         = "80"
     "QUARKUS_HTTP_PORT"                     = "80"
     "WEBSITES_CONTAINER_START_TIME_LIMIT"   = "1800"
-    "WEBSITE_RUN_FROM_PACKAGE"              = "1"
     "AZURE_CONNECTION_STRING"               = azurerm_storage_account.sa_app.primary_connection_string
     "QUEUE_NAME"                            = azurerm_storage_queue.queue.name
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string
@@ -136,7 +135,6 @@ resource "azurerm_linux_web_app" "worker" {
   }
 
   app_settings = {
-    "WEBSITE_RUN_FROM_PACKAGE"              = "1"
     "AZURE_CONNECTION_STRING"               = azurerm_storage_account.sa_app.primary_connection_string
     "QUEUE_NAME"                            = azurerm_storage_queue.queue.name
     "QUARKUS_MAILER_FROM"                   = "alexandre.dellaestudos@gmail.com"
@@ -172,7 +170,6 @@ resource "azurerm_linux_web_app" "worker_reports" {
   }
 
   app_settings = {
-    "WEBSITE_RUN_FROM_PACKAGE"              = "1"
     "DB_URL"                                = "jdbc:postgresql://${azurerm_postgresql_flexible_server.db_server.fqdn}:5432/feedbackdb?sslmode=require"
     "DB_USER"                               = "psqladmin"
     "DB_PASSWORD"                           = var.db_password
