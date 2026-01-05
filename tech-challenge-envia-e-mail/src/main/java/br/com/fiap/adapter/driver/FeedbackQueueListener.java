@@ -22,7 +22,6 @@ import java.util.List;
 @ApplicationScoped
 public class FeedbackQueueListener {
 
-    // O Logger oficial do Quarkus (aparece melhor na Azure)
     @Inject
     Logger LOG;
 

@@ -139,14 +139,15 @@ resource "azurerm_linux_web_app" "worker" {
     "WEBSITE_RUN_FROM_PACKAGE"              = "1"
     "AZURE_CONNECTION_STRING"               = azurerm_storage_account.sa_app.primary_connection_string
     "QUEUE_NAME"                            = azurerm_storage_queue.queue.name
-    "QUARKUS_MAILER_FROM"                   = var.email_user
+    "QUARKUS_MAILER_FROM"                   = "alexandre.dellaestudos@gmail.com"
     "QUARKUS_MAILER_HOST"                   = "smtp-relay.brevo.com"
     "QUARKUS_MAILER_PORT"                   = "587"
     "QUARKUS_MAILER_STARTTLS"               = "REQUIRED"
     "QUARKUS_MAILER_USERNAME"               = var.email_user
     "QUARKUS_MAILER_PASSWORD"               = var.email_password
     "QUARKUS_MAILER_MOCK"                   = "false"
-    "EMAIL_DESTINATARIO_ADMIN"              = var.email_user
+    "QUARKUS_MAILER_AUTH_METHODS"           = "LOGIN PLAIN"
+    "EMAIL_DESTINATARIO_ADMIN"              = "alexandre.dellaestudos@gmail.com"
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string
     "WEBSITES_PORT"                         = "80"
     "QUARKUS_HTTP_PORT"                     = "80"
@@ -154,54 +155,39 @@ resource "azurerm_linux_web_app" "worker" {
   }
 }
 
-resource "azurerm_service_plan" "function_plan" {
-  name                = "plan-func-${var.app_name}"
+resource "azurerm_linux_web_app" "worker_reports" {
+  name                = "worker-reports-${var.app_name}"
   resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
-  os_type             = "Linux"
-  sku_name            = "Y1"
-}
-
-resource "azurerm_linux_function_app" "fn_app" {
-  name                = "func-${var.app_name}"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
-  service_plan_id     = azurerm_service_plan.function_plan.id
-
-  storage_account_name       = azurerm_storage_account.sa_app.name
-  storage_account_access_key = azurerm_storage_account.sa_app.primary_access_key
+  location            = azurerm_service_plan.worker_plan.location
+  service_plan_id     = azurerm_service_plan.worker_plan.id
 
   site_config {
+    always_on = true
     application_stack {
-      java_version = "17"
+      java_server         = "JAVA"
+      java_server_version = "17"
+      java_version        = "17"
     }
-    cors {
-      allowed_origins = [
-        "https://portal.azure.com",
-        "https://ms.portal.azure.com"
-      ]
-      support_credentials = true
-    }
+    app_command_line = "java -jar /home/site/wwwroot/app.jar"
   }
 
   app_settings = {
+    "WEBSITE_RUN_FROM_PACKAGE"              = "1"
     "DB_URL"                                = "jdbc:postgresql://${azurerm_postgresql_flexible_server.db_server.fqdn}:5432/feedbackdb?sslmode=require"
     "DB_USER"                               = "psqladmin"
     "DB_PASSWORD"                           = var.db_password
-    "AzureWebJobsStorage"                   = azurerm_storage_account.sa_app.primary_connection_string
-    "QUARKUS_MAILER_FROM"                   = var.email_user
+    "QUARKUS_MAILER_FROM"                   = "alexandre.dellaestudos@gmail.com"
     "QUARKUS_MAILER_HOST"                   = "smtp-relay.brevo.com"
     "QUARKUS_MAILER_PORT"                   = "587"
     "QUARKUS_MAILER_STARTTLS"               = "REQUIRED"
     "QUARKUS_MAILER_USERNAME"               = var.email_user
     "QUARKUS_MAILER_PASSWORD"               = var.email_password
-    "QUARKUS_MAILER_MOCK"                   = "false"
-    "AzureFunctionsJobHost__functionTimeout" = "00:10:00"
+    "QUARKUS_MAILER_MOCK"                   = "true"
+    "QUARKUS_MAILER_AUTH_METHODS"           = "LOGIN PLAIN"
+    "EMAIL_DESTINATARIO_ADMIN"              = "alexandre.dellaestudos@gmail.com"
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string
-    "FUNCTIONS_WORKER_RUNTIME"              = "java"
-    "FUNCTIONS_EXTENSION_VERSION"           = "~4"
-    "JAVA_OPTS"                             = "-XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xmx512m"
-    "WEBSITE_RUN_FROM_PACKAGE"              = "1"
-    "SCM_DO_BUILD_DURING_DEPLOYMENT"        = "false"
+    "WEBSITES_PORT"                         = "80"
+    "QUARKUS_HTTP_PORT"                     = "80"
+    "WEBSITES_CONTAINER_START_TIME_LIMIT"   = "1800"
   }
 }

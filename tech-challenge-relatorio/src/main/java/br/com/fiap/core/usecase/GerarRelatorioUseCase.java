@@ -82,7 +82,7 @@ public class GerarRelatorioUseCase {
         }
 
         html.append("</table>");
-        html.append("<br><p style='font-size: 12px; color: #7f8c8d;'><i>Relatório gerado automaticamente via Azure Functions.</i></p>");
+        html.append("<br><p style='font-size: 12px; color: #7f8c8d;'><i>Relatório gerado automaticamente via Azure Worker.</i></p>");
         html.append("</body></html>");
 
         notificacaoPort.enviarRelatorio(emailDestino, "📊 Relatório Semanal Completo", html.toString());
