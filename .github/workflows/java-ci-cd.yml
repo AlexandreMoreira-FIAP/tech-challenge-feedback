@@ -29,9 +29,6 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Install Azure Functions Core Tools
-        run: npm i -g azure-functions-core-tools@4 --unsafe-perm true
-
       - name: Build API
         run: mvn clean package -DskipTests -Dquarkus.package.type=uber-jar -Dquarkus.package.output-name=app
         working-directory: ./java
@@ -40,8 +37,8 @@ jobs:
         run: mvn clean package -DskipTests -Dquarkus.package.type=uber-jar -Dquarkus.package.output-name=app
         working-directory: ./tech-challenge-envia-e-mail
 
-      - name: Build Relatorio Function
-        run: mvn clean package -DskipTests
+      - name: Build Relatorio Worker
+        run: mvn clean package -DskipTests -Dquarkus.package.type=uber-jar -Dquarkus.package.output-name=app
         working-directory: ./tech-challenge-relatorio
 
       - name: Upload API Artifact
@@ -59,8 +56,8 @@ jobs:
       - name: Upload Relatorio Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: relatorio-func
-          path: tech-challenge-relatorio/target/azure-functions/tech-challenge-relatorio
+          name: relatorio-app
+          path: tech-challenge-relatorio/target/app-runner.jar
 
   deploy:
     name: Deploy to Azure
@@ -83,7 +80,7 @@ jobs:
       - name: Download Relatorio
         uses: actions/download-artifact@v4
         with:
-          name: relatorio-func
+          name: relatorio-app
           path: relatorio
 
       - name: Login to Azure
@@ -93,22 +90,9 @@ jobs:
 
       - name: Preparar e Zipar API
         run: |
-          echo "📂 Listando arquivos baixados para debug:"
-          ls -R api
-          
-          echo "🔍 Procurando o JAR..."
-          # Encontra o arquivo jar, não importa a subpasta
           JAR_PATH=$(find api -name "*runner.jar" -type f | head -n 1)
-          echo "Jar encontrado em: $JAR_PATH"
-          
-          # Move para a raiz com o nome correto
           mv "$JAR_PATH" app.jar
-          
-          # Cria o zip apenas com o app.jar na raiz
           zip api-package.zip app.jar
-          
-          echo "📦 Conteúdo do ZIP gerado:"
-          unzip -l api-package.zip
 
       - name: Deploy API
         uses: azure/webapps-deploy@v3
@@ -116,38 +100,26 @@ jobs:
           app-name: 'app-techchallengefeedback'
           package: 'api-package.zip'
 
-      - name: Preparar e Zipar Worker
+      - name: Preparar e Zipar Worker Fila
         run: |
-          echo "📂 Listando arquivos baixados para debug:"
-          ls -R worker
-
-          echo "🔍 Procurando o JAR..."
           JAR_PATH=$(find worker -name "*runner.jar" -type f | head -n 1)
-          echo "Jar encontrado em: $JAR_PATH"
-          
           mv "$JAR_PATH" app.jar
           zip worker-package.zip app.jar
-          
-          echo "📦 Conteúdo do ZIP gerado:"
-          unzip -l worker-package.zip
 
-      - name: Deploy Worker
+      - name: Deploy Worker Fila
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'worker-techchallengefeedback'
           package: 'worker-package.zip'
 
-      - name: Preparar Relatorio (Zipar Conteúdo)
+      - name: Preparar e Zipar Worker Relatorio
         run: |
-          cd relatorio
-          # Zipa o conteúdo da pasta (onde estão as functions)
-          zip -r ../relatorio.zip .
-          cd ..
-          echo "📦 Verificando zip criado:"
-          ls -la relatorio.zip
+          JAR_PATH=$(find relatorio -name "*runner.jar" -type f | head -n 1)
+          mv "$JAR_PATH" app.jar
+          zip relatorio-package.zip app.jar
 
-      - name: Deploy Relatorio Function
-        uses: azure/functions-action@v1
+      - name: Deploy Worker Relatorio
+        uses: azure/webapps-deploy@v3
         with:
-          app-name: 'func-techchallengefeedback'
-          package: './relatorio.zip'
+          app-name: 'worker-reports-techchallengefeedback'
+          package: 'relatorio-package.zip'
