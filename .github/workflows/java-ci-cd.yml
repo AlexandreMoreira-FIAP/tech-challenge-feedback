@@ -92,8 +92,11 @@ jobs:
         run: |
           JAR_PATH=$(find api -name "*runner.jar" -type f | head -n 1)
           if [ -z "$JAR_PATH" ]; then exit 1; fi
-          mv "$JAR_PATH" app.jar
-          zip api-package.zip app.jar
+          mkdir -p deploy_api
+          cp "$JAR_PATH" deploy_api/app.jar
+          cd deploy_api
+          zip -r ../api-package.zip .
+          cd ..
           unzip -l api-package.zip
 
       - name: Deploy API
@@ -106,8 +109,11 @@ jobs:
         run: |
           JAR_PATH=$(find worker -name "*runner.jar" -type f | head -n 1)
           if [ -z "$JAR_PATH" ]; then exit 1; fi
-          mv "$JAR_PATH" app.jar
-          zip worker-package.zip app.jar
+          mkdir -p deploy_worker
+          cp "$JAR_PATH" deploy_worker/app.jar
+          cd deploy_worker
+          zip -r ../worker-package.zip .
+          cd ..
           unzip -l worker-package.zip
 
       - name: Deploy Worker Fila
@@ -120,8 +126,11 @@ jobs:
         run: |
           JAR_PATH=$(find relatorio -name "*runner.jar" -type f | head -n 1)
           if [ -z "$JAR_PATH" ]; then exit 1; fi
-          mv "$JAR_PATH" app.jar
-          zip relatorio-package.zip app.jar
+          mkdir -p deploy_relatorio
+          cp "$JAR_PATH" deploy_relatorio/app.jar
+          cd deploy_relatorio
+          zip -r ../relatorio-package.zip .
+          cd ..
           unzip -l relatorio-package.zip
 
       - name: Deploy Worker Relatorio
