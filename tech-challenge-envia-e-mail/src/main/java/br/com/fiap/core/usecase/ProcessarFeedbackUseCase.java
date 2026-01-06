@@ -52,7 +52,7 @@ public class ProcessarFeedbackUseCase {
         }
 
         html.append("</table>");
-        html.append("<br><p><i>Enviado automaticamente pelo Worker de Processamento.</i></p>");
+        html.append("<br><p><i>Enviado automaticamente, por gentileza fazer o tratamento.</i></p>");
         html.append("</body></html>");
 
         notificador.enviarEmail(emailDestino, assunto, html.toString());
