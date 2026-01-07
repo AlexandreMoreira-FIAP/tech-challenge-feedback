@@ -179,7 +179,7 @@ resource "azurerm_linux_web_app" "worker_reports" {
     "QUARKUS_MAILER_STARTTLS"               = "REQUIRED"
     "QUARKUS_MAILER_USERNAME"               = var.email_user
     "QUARKUS_MAILER_PASSWORD"               = var.email_password
-    "QUARKUS_MAILER_MOCK"                   = "true"
+    "QUARKUS_MAILER_MOCK"                   = "false"
     "QUARKUS_MAILER_AUTH_METHODS"           = "LOGIN PLAIN"
     "EMAIL_DESTINATARIO_ADMIN"              = "alexandre.dellaestudos@gmail.com"
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string

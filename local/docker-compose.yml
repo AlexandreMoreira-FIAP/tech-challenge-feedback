@@ -64,6 +64,7 @@ services:
       - AZURE_CONNECTION_STRING=DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;
       - QUEUE_NAME=feedback-urgente-queue
       - QUARKUS_MAILER_MOCK=true
+      - QUARKUS_MAILER_FROM=mock@local.com
     depends_on:
       azurite:
         condition: service_started
@@ -79,13 +80,11 @@ services:
       - DB_URL=jdbc:postgresql://db:5432/tech_challenge_db
       - DB_USER=admin
       - DB_PASSWORD=admin
-      - AzureWebJobsStorage=DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;
       - QUARKUS_MAILER_MOCK=true
+      - QUARKUS_MAILER_FROM=mock@local.com
     depends_on:
       db:
         condition: service_healthy
-      azurite:
-        condition: service_started
     networks:
       - tech-network
 
