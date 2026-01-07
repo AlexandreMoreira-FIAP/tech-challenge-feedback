@@ -1,18 +1,18 @@
 FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /usr/src/app
-
 COPY pom.xml .
 RUN mvn dependency:go-offline
-
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-RUN mkdir -p /app_output && \
-    cp -r target/azure-functions/*/* /app_output/
+FROM registry.access.redhat.com/ubi8/openjdk-17:1.18
+ENV LANGUAGE='en_US:en'
+COPY --from=build --chown=185 /usr/src/app/target/quarkus-app/lib/ /deployments/lib/
+COPY --from=build --chown=185 /usr/src/app/target/quarkus-app/*.jar /deployments/
+COPY --from=build --chown=185 /usr/src/app/target/quarkus-app/app/ /deployments/app/
+COPY --from=build --chown=185 /usr/src/app/target/quarkus-app/quarkus/ /deployments/quarkus/
 
-# Estágio 2: Runtime
-FROM mcr.microsoft.com/azure-functions/java:4-java17
-ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
-    AzureFunctionsJobHost__Logging__Console__IsEnabled=true
-
-COPY --from=build /app_output /home/site/wwwroot
+EXPOSE 8080
+USER 185
+ENV JAVA_OPTS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+ENTRYPOINT [ "java", "-jar", "/deployments/quarkus-run.jar" ]

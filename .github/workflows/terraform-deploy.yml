@@ -35,8 +35,6 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      # --- O PASSO NOVO E MÁGICO É ESSE AQUI 👇 ---
       - name: Verificar e Criar Backend (Bootstrap)
         uses: azure/CLI@v1
         with:
