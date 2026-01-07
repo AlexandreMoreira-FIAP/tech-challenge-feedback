@@ -35,7 +35,7 @@ Todos os componentes da solução são executados como **Web Apps (PaaS)** na Mi
 incluindo a API principal e os Workers de Processamento e Relatórios, garantindo
 padronização, escalabilidade e menor sobrecarga operacional.
 
-![Arquitetura de Feedback Serverless PaaS](docs/images/arquitetura-feedback-paas.png)
+![Arquitetura de Feedback Serverless PaaS](docs/images/Arquitetura_Tech4_fiap.png)
 
 
 ### 🔄 Fluxo de Dados
