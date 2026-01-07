@@ -91,7 +91,7 @@ O arquivo `docker-compose.yml` provisiona:
 
 ## 🌐 Acessos Locais
 ### API
-- Swagger UI: http://localhost:8080/q/swagger-ui
+- http://localhost:8080/avaliacao
 
 ### Banco de Dados
 - Host: localhost
